@@ -1,0 +1,45 @@
+Assignment 3 — Image filter (Serial and Pthreads)
+Student: ضياء عرار
+
+1. Objective
+Apply 3x3 convolution masks (edge, sharpen, blur) to a grayscale image (input format: rows cols then pixel values). Implement a serial program and a pthreads parallel version; measure runtime and compute speedup.
+
+2. Implementation summary
+- Serial: apply_filter.cpp
+  - Reads image and mask (mask may include divisor; otherwise divisor = sum(mask) or 1 if sum==0).
+  - Processes internal pixels (rows 1..R-2, cols 1..C-2). Borders remain unchanged.
+  - Uses 64-bit chrono timers to measure compute time for the convolution loop only.
+
+- Parallel: papply_filter.cpp
+  - Uses POSIX threads.
+  - Divides image rows among threads (simple block partition). Each thread computes its assigned rows (clamped to avoid borders).
+  - Shared read-only input image; shared output matrix where threads write disjoint rows. No locks required.
+  - Timing covers all threads execution (from create to join).
+
+3. How to build and run
+- Build:
+    make
+- Run serial:
+    ./apply_filter oimage.txt mask_blur.txt out_serial_blur.txt
+- Run parallel (example with 4 threads):
+    ./papply_filter oimage.txt mask_blur.txt out_parallel_blur.txt 4
+
+4. Timing & speedup 
+- run several times for each configuration and average.
+- Example commands:
+    ./apply_filter oimage.txt mask_blur.txt out_s.txt : Serial filter time (seconds): 0.00421697
+    ./papply_filter oimage.txt mask_blur.txt out_p_1.txt 1 : Parallel filter time (seconds) with 1 threads: 0.00733622
+    ./papply_filter oimage.txt mask_blur.txt out_p_2.txt 2 : Parallel filter time (seconds) with 2 threads: 0.00309188
+    ./papply_filter oimage.txt mask_blur.txt out_p_4.txt 4 : Parallel filter time (seconds) with 4 threads: 0.00308367
+- Record reported times. Speedup(p) = T_serial / T_parallel(p).
+  for 1 thread s= .5748
+  for 2 thread s= 1.363
+  for 4 thread s= 1.367
+- Note :my machine does not support 4 :)
+- Note: for small images, overhead may dominate. Use the largest test image available for clearer speedup.
+
+5. Remarks and possible improvements
+- Current partitioning is by contiguous rows; for better load balance and cache locality, consider stripe partitioning or dynamic work-stealing.
+- Border handling could use zero-padding or replicate borders for different visual effects.
+- For larger speedups, consider using OpenMP or vectorized operations (SIMD).
+
