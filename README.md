@@ -142,7 +142,7 @@ SIMD (AVX/SSE) optimization
 
 👤 Author
 Dia Arar
-Parallel Programming — Assignment 3
+Parallelized-filter
 An-Najah National University
 
-<p align="center"> <b>⭐ If you like this project, consider starring the repository!</b> </p> ```
+<p align="center"> <b>⭐ If you like this project, consider starring the repository!</b> </p> 
